@@ -1,2 +1,2 @@
-# curri
-교육일정 계산
+# Training schedule calculation program
+훈련일정 계산
