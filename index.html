@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -458,7 +457,7 @@
 
                     <div class="input-group">
                         <label>총 수업시간 (시간)</label>
-                        <input type="number" id="totalHours" min="1" value="480">
+                        <input type="number" id="totalHours" min="1" value="100">
                     </div>
 
                     <div class="input-group">
@@ -483,7 +482,7 @@
 
             <div>
                 <div class="result-section" id="resultSection" style="display: none;">
-                    <h3>📊 계산 결과</h3>
+                    <h3 id="resultTitle">📊 계산 결과</h3>
                     <div class="result-grid">
                         <div class="result-item">
                             <label>시작일</label>
@@ -513,7 +512,7 @@
                 </div>
 
                 <div class="period-section" id="periodSection" style="display: none;">
-                    <h3>📅 차수별 교육 기간</h3>
+                    <h3 id="periodTitle">📅 차수별 교육 기간</h3>
                     <div id="periodList"></div>
                 </div>
 
@@ -807,6 +806,7 @@
             const startDateInput = document.getElementById('startDate').value;
             const dailyHours = parseInt(document.getElementById('dailyHours').value);
             const totalHours = parseInt(document.getElementById('totalHours').value);
+            const courseName = document.getElementById('courseName').value.trim();
 
             if (!startDateInput || !dailyHours || !totalHours) {
                 alert('모든 필수 항목을 입력해주세요.');
@@ -870,6 +870,14 @@
 
             document.getElementById('resultSection').style.display = 'block';
             document.getElementById('legend').style.display = 'flex';
+
+            // 계산 결과 제목 설정
+            const resultTitle = courseName ? `📊 ${courseName} - 계산 결과` : '📊 계산 결과';
+            document.getElementById('resultTitle').textContent = resultTitle;
+
+            // 차수별 기간 제목 설정
+            const periodTitle = courseName ? `📅 ${courseName} - 차수별 교육 기간` : '📅 차수별 교육 기간';
+            document.getElementById('periodTitle').textContent = periodTitle;
 
             // 차수별 기간 계산
             calculatePeriods(startDate, classDates, dailyHours);
