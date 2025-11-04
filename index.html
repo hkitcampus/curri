@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -126,7 +127,6 @@
             background: #218838;
         }
         
-        /* 추가 휴강 스타일 */
         #customHolidaysList {
             margin-top: 10px;
             padding: 10px;
@@ -196,11 +196,58 @@
             color: #333;
         }
 
-        /* 4) 수정: 캘린더 섹션의 높이 제한 및 스크롤 제거 (전체 페이지 스크롤 사용) */
+        /* 차수별 정보 표시 스타일 */
+        .period-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+
+        .period-section h3 {
+            margin-bottom: 15px;
+            color: #667eea;
+        }
+
+        .period-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 4px solid #764ba2;
+        }
+
+        .period-item h4 {
+            color: #764ba2;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .period-item .period-info {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .period-info-item {
+            font-size: 13px;
+        }
+
+        .period-info-item strong {
+            display: block;
+            color: #666;
+            font-size: 11px;
+            margin-bottom: 3px;
+        }
+
+        .period-info-item span {
+            color: #333;
+            font-weight: 600;
+        }
+
         .calendar-section {
-            /* overflow-y: auto; */
-            /* max-height: 800px; */
-            padding: 10px; /* 가독성을 위해 패딩 추가 */
+            padding: 10px;
         }
 
         .calendar-month {
@@ -411,7 +458,7 @@
 
                     <div class="input-group">
                         <label>총 수업시간 (시간)</label>
-                        <input type="number" id="totalHours" min="1" value="100">
+                        <input type="number" id="totalHours" min="1" value="480">
                     </div>
 
                     <div class="input-group">
@@ -421,9 +468,7 @@
                         <button class="btn btn-secondary" onclick="addCustomHoliday()" style="margin-top: 10px; padding: 10px; width: auto;">추가</button>
                     </div>
 
-                    <div id="customHolidaysList">
-                        </div>
-
+                    <div id="customHolidaysList"></div>
 
                     <button class="btn btn-primary" onclick="calculate()">계산하기</button>
                     <button class="btn btn-success" onclick="saveCourse()">과정 저장하기</button>
@@ -467,6 +512,11 @@
                     </div>
                 </div>
 
+                <div class="period-section" id="periodSection" style="display: none;">
+                    <h3>📅 차수별 교육 기간</h3>
+                    <div id="periodList"></div>
+                </div>
+
                 <div class="legend" id="legend" style="display: none;">
                     <div class="legend-item">
                         <div class="legend-color" style="background: #28a745;"></div>
@@ -492,7 +542,6 @@
     </div>
 
     <script>
-        // 3) course_holliday.js의 officialHolidays 객체를 통합하여 사용
         const officialHolidays = {
             '2025-01-01': '신정',
             '2025-01-28': '설날 연휴',
@@ -599,101 +648,10 @@
             '2030-09-11': '추석 연휴 (대체공휴일)',
             '2030-10-03': '개천절',
             '2030-10-09': '한글날',
-            '2030-12-25': '크리스마스',
-            '2031-01-01': '신정',
-            '2031-01-21': '설날 연휴',
-            '2031-01-22': '설날',
-            '2031-01-23': '설날 연휴',
-            '2031-03-01': '3·1절',
-            '2031-03-03': '3·1절 (대체공휴일)',
-            '2031-05-05': '어린이날',
-            '2031-04-29': '부처님오신날',
-            '2031-06-06': '현충일',
-            '2031-08-15': '광복절',
-            '2031-09-29': '추석 연휴',
-            '2031-09-30': '추석',
-            '2031-10-01': '추석 연휴',
-            '2031-10-03': '개천절',
-            '2031-10-09': '한글날',
-            '2031-12-25': '크리스마스',
-            '2032-01-01': '신정',
-            '2032-02-09': '설날 연휴',
-            '2032-02-10': '설날',
-            '2032-02-11': '설날 연휴',
-            '2032-03-01': '3·1절',
-            '2032-05-05': '어린이날',
-            '2032-05-17': '부처님오신날',
-            '2032-06-06': '현충일',
-            '2032-08-15': '광복절',
-            '2032-08-16': '광복절 (대체공휴일)',
-            '2032-09-17': '추석 연휴',
-            '2032-09-18': '추석',
-            '2032-09-19': '추석 연휴',
-            '2032-09-20': '추석 연휴 (대체공휴일)',
-            '2032-09-21': '추석 연휴 (대체공휴일)',
-            '2032-10-03': '개천절',
-            '2032-10-04': '개천절 (대체공휴일)',
-            '2032-10-09': '한글날',
-            '2032-10-11': '한글날 (대체공휴일)',
-            '2032-12-25': '크리스마스',
-            '2033-01-01': '신정',
-            '2033-01-29': '설날 연휴',
-            '2033-01-30': '설날',
-            '2033-01-31': '설날 연휴',
-            '2033-02-01': '설날 연휴 (대체공휴일)',
-            '2033-02-02': '설날 (대체공휴일)',
-            '2033-03-01': '3·1절',
-            '2033-05-05': '어린이날',
-            '2033-05-06': '부처님오신날',
-            '2033-06-06': '현충일',
-            '2033-08-15': '광복절',
-            '2033-10-06': '추석 연휴',
-            '2033-10-07': '추석',
-            '2033-10-08': '추석 연휴',
-            '2033-10-03': '개천절',
-            '2033-10-09': '한글날',
-            '2033-10-11': '추석 연휴 (대체공휴일)',
-            '2033-10-12': '한글날 (대체공휴일)',
-            '2033-12-25': '크리스마스',
-            '2034-01-01': '신정',
-            '2034-01-02': '신정 (대체공휴일)',
-            '2034-02-18': '설날 연휴',
-            '2034-02-19': '설날',
-            '2034-02-20': '설날 연휴',
-            '2034-02-21': '설날 연휴 (대체공휴일)',
-            '2034-03-01': '3·1절',
-            '2034-05-05': '어린이날',
-            '2034-05-26': '부처님오신날',
-            '2034-06-06': '현충일',
-            '2034-08-15': '광복절',
-            '2034-09-25': '추석 연휴',
-            '2034-09-26': '추석',
-            '2034-09-27': '추석 연휴',
-            '2034-10-03': '개천절',
-            '2034-10-09': '한글날',
-            '2034-12-25': '크리스마스',
-            '2035-01-01': '신정',
-            '2035-01-02': '신정 (대체공휴일)',
-            '2035-02-06': '설날 연휴',
-            '2035-02-07': '설날',
-            '2035-02-08': '설날 연휴',
-            '2035-03-01': '3·1절',
-            '2035-05-05': '어린이날',
-            '2035-05-07': '어린이날 (대체공휴일)',
-            '2035-05-15': '부처님오신날',
-            '2035-06-06': '현충일',
-            '2035-08-15': '광복절',
-            '2035-09-13': '추석 연휴',
-            '2035-09-14': '추석',
-            '2035-09-15': '추석 연휴',
-            '2035-09-16': '추석 연휴 (대체공휴일)',
-            '2035-10-03': '개천절',
-            '2035-10-09': '한글날',
-            '2035-12-25': '크리스마스'
+            '2030-12-25': '크리스마스'
         };
 
-        // 1), 2) 추가 휴강 데이터를 배열 of Object로 관리
-        let customHolidays = loadCustomHolidays(); // [{date: '2025-03-15', name: '워크숍'}]
+        let customHolidays = loadCustomHolidays();
         let savedCourses = loadSavedCourses();
 
         function loadCustomHolidays() {
@@ -715,7 +673,6 @@
             localStorage.setItem('savedCourses', JSON.stringify(savedCourses));
         }
 
-        // 1) 추가 휴강 목록 표시 함수
         function displayCustomHolidays() {
             const list = document.getElementById('customHolidaysList');
             list.innerHTML = '';
@@ -727,13 +684,12 @@
                 item.className = 'custom-holiday-item';
                 item.innerHTML = `
                     <span>${holiday.date} (${holiday.name})</span>
-                    <button onclick="removeCustomHoliday(${index})">x</button>
+                    <button onclick="removeCustomHoliday(${index})">×</button>
                 `;
                 list.appendChild(item);
             });
         }
 
-        // 1) 추가 휴강 추가 함수
         function addCustomHoliday() {
             const dateInput = document.getElementById('newCustomHolidayDate').value;
             const nameInput = document.getElementById('newCustomHolidayName').value.trim() || '추가 휴강';
@@ -750,7 +706,6 @@
                 return;
             }
             
-            // 공휴일과 겹치는지 확인 (선택 사항이지만 중복 방지를 위해)
             if (officialHolidays[dateStr]) {
                  if (!confirm(`선택한 날짜(${dateStr})는 이미 공휴일(${officialHolidays[dateStr]})입니다. 그래도 추가하시겠습니까?`)) {
                     return;
@@ -763,12 +718,10 @@
             document.getElementById('newCustomHolidayName').value = '';
         }
 
-        // 1) 추가 휴강 삭제 함수
         function removeCustomHoliday(index) {
             customHolidays.splice(index, 1);
             saveCustomHolidays();
         }
-
 
         function displaySavedCourses() {
             const container = document.getElementById('savedCourses');
@@ -797,7 +750,7 @@
         }
 
         function deleteCourse(event, index) {
-            event.stopPropagation(); // 버튼 클릭 시 부모 요소의 클릭 이벤트 방지
+            event.stopPropagation();
             if (confirm('이 과정을 삭제하시겠습니까?')) {
                 savedCourses.splice(index, 1);
                 saveCourseToStorage();
@@ -805,18 +758,16 @@
             }
         }
 
-        // 2) 과정 불러오기 수정: 추가 휴강도 함께 불러오기
         function loadCourse(event, index) {
-            event.stopPropagation(); // 버튼 클릭 시 부모 요소의 클릭 이벤트 방지
+            event.stopPropagation();
             const course = savedCourses[index];
             document.getElementById('courseName').value = course.name;
             document.getElementById('startDate').value = course.startDate;
             document.getElementById('dailyHours').value = course.dailyHours;
             document.getElementById('totalHours').value = course.totalHours;
 
-            // 추가 휴강 불러오기
             customHolidays = course.customHolidays || [];
-            saveCustomHolidays(); // 로컬 스토리지에 저장 및 표시 업데이트
+            saveCustomHolidays();
             
             calculate();
         }
@@ -826,12 +777,10 @@
             return day === 0 || day === 6;
         }
 
-        // 3) 공휴일 체크 함수 수정: officialHolidays와 customHolidays 모두 확인
         function isHoliday(dateStr) {
             return officialHolidays[dateStr] || customHolidays.some(h => h.date === dateStr);
         }
 
-        // 3) 공휴일 이름 가져오는 함수 수정
         function getHolidayName(dateStr) {
             if (officialHolidays[dateStr]) return officialHolidays[dateStr];
             const customHoliday = customHolidays.find(h => h.date === dateStr);
@@ -846,6 +795,14 @@
             return `${year}-${month}-${day}`;
         }
 
+        // 만 1개월 후 날짜 계산 함수
+        function addOneMonth(date) {
+            const newDate = new Date(date);
+            newDate.setMonth(newDate.getMonth() + 1);
+            newDate.setDate(newDate.getDate() - 1);
+            return newDate;
+        }
+
         function calculate() {
             const startDateInput = document.getElementById('startDate').value;
             const dailyHours = parseInt(document.getElementById('dailyHours').value);
@@ -858,18 +815,14 @@
 
             const requiredDays = Math.ceil(totalHours / dailyHours);
             let currentDate = new Date(startDateInput);
-            
-            // 날짜를 하루씩 증가시켜 시작일도 포함되도록 조정
-            currentDate.setDate(currentDate.getDate()); 
 
             let classDaysCount = 0;
             let weekendCount = 0;
             let holidayCount = 0;
             const classDates = [];
             
-            const maxDaysCheck = 365 * 10; // 무한 루프 방지 (최대 10년)
+            const maxDaysCheck = 365 * 10;
             let iterationCount = 0;
-
 
             while (classDaysCount < requiredDays) {
                 if (iterationCount > maxDaysCheck) {
@@ -881,13 +834,11 @@
                 const isWE = isWeekend(currentDate);
                 const isH = isHoliday(dateStr);
                 
-                // 오늘 날짜가 시작일이면서 수업 일정을 잡아야 하는 날인 경우
                 if (classDates.length === 0 && dateStr === startDateInput) {
                     if (!isWE && !isH) {
                          classDates.push(new Date(currentDate));
                          classDaysCount++;
                     } else {
-                        // 시작일이 주말/공휴일인 경우, 다음 날짜로 넘어감.
                         if (isWE) weekendCount++;
                         if (isH) holidayCount++;
                     }
@@ -901,7 +852,6 @@
                     }
                 }
                 
-                // 다음 날짜로 이동
                 currentDate.setDate(currentDate.getDate() + 1);
                 iterationCount++;
             }
@@ -910,24 +860,128 @@
             const endDate = classDates[classDates.length - 1];
             const totalDays = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
 
-            // 결과 표시
+            // 기본 결과 표시
             document.getElementById('resultStartDate').textContent = formatDate(startDate);
             document.getElementById('resultEndDate').textContent = formatDate(endDate);
             document.getElementById('resultTotalDays').textContent = `${totalDays}일`;
             document.getElementById('resultClassDays').textContent = `${classDaysCount}일`;
-            // 주말/공휴일 카운트는 수업 시작일 *이후*에 계산된 횟수만 포함해야 하므로,
-            // 현재의 `weekendCount`와 `holidayCount`는 계산 시작일(startDateInput)부터 종료일(endDate)까지의 총 제외 일수입니다.
             document.getElementById('resultWeekends').textContent = `${weekendCount}일`;
             document.getElementById('resultHolidays').textContent = `${holidayCount}일`;
 
             document.getElementById('resultSection').style.display = 'block';
             document.getElementById('legend').style.display = 'flex';
 
-            // 4) 달력 생성
+            // 차수별 기간 계산
+            calculatePeriods(startDate, classDates, dailyHours);
+
+            // 달력 생성
             generateCalendar(startDate, endDate, classDates);
         }
 
-        // 4) 달력 생성 함수 (스크롤 div 유지)
+        // 차수별 기간 계산 함수 (수정: 총 수업시간 제한, 수업일 계산 방식 변경)
+        function calculatePeriods(startDate, classDates, dailyHours) {
+            const totalHours = parseInt(document.getElementById('totalHours').value);
+            const periods = [];
+            let currentPeriodStart = new Date(startDate);
+            let periodNumber = 1;
+            let classDateIndex = 0;
+            let accumulatedHours = 0; // 누적 수업시간
+
+            while (classDateIndex < classDates.length && accumulatedHours < totalHours) {
+                // 만 1개월 종료일 계산
+                const periodEnd = addOneMonth(currentPeriodStart);
+                
+                // 이 기간 내의 수업일 찾기
+                const periodClassDates = [];
+                
+                while (classDateIndex < classDates.length) {
+                    const classDate = classDates[classDateIndex];
+                    if (classDate <= periodEnd) {
+                        periodClassDates.push(classDate);
+                        classDateIndex++;
+                    } else {
+                        break;
+                    }
+                }
+
+                if (periodClassDates.length > 0) {
+                    const actualPeriodEnd = periodClassDates[periodClassDates.length - 1];
+                    
+                    // 이 기간의 예상 수업시간 계산
+                    let periodHours = periodClassDates.length * dailyHours;
+                    
+                    // 총 수업시간을 초과하지 않도록 조정
+                    if (accumulatedHours + periodHours > totalHours) {
+                        periodHours = totalHours - accumulatedHours;
+                    }
+                    
+                    // 단위기간 수업일 = 단위기간 수업시간 / 1일 수업시간
+                    const periodDays = Math.ceil(periodHours / dailyHours);
+                    
+                    accumulatedHours += periodHours;
+                    
+                    // 마지막 단위기간인지 확인 (누적시간이 총 수업시간에 도달했거나 모든 수업일을 소진)
+                    const isRemaining = (accumulatedHours >= totalHours || classDateIndex >= classDates.length) && 
+                                       actualPeriodEnd < periodEnd;
+                    
+                    periods.push({
+                        number: periodNumber,
+                        startDate: formatDate(currentPeriodStart),
+                        endDate: formatDate(actualPeriodEnd),
+                        classDays: periodDays,
+                        totalHours: periodHours,
+                        isRemaining: isRemaining
+                    });
+                }
+
+                // 다음 기간 시작일 설정
+                currentPeriodStart = new Date(periodEnd);
+                currentPeriodStart.setDate(currentPeriodStart.getDate() + 1);
+                periodNumber++;
+            }
+
+            displayPeriods(periods);
+        }
+
+        // 차수별 정보 표시 함수
+        function displayPeriods(periods) {
+            const periodSection = document.getElementById('periodSection');
+            const periodList = document.getElementById('periodList');
+            
+            periodList.innerHTML = '';
+            
+            periods.forEach(period => {
+                const periodItem = document.createElement('div');
+                periodItem.className = 'period-item';
+                
+                const title = period.isRemaining ? 
+                    `${period.number}차 (잔여 기간)` : 
+                    `${period.number}차`;
+                
+                periodItem.innerHTML = `
+                    <h4>${title}</h4>
+                    <div class="period-info">
+                        <div class="period-info-item">
+                            <strong>기간</strong>
+                            <span>${period.startDate} ~ ${period.endDate}</span>
+                        </div>
+                        <div class="period-info-item">
+                            <strong>수업일수</strong>
+                            <span>${period.classDays}일</span>
+                        </div>
+                        <div class="period-info-item">
+                            <strong>교육시간</strong>
+                            <span>${period.totalHours}시간</span>
+                        </div>
+                    </div>
+                `;
+                
+                periodList.appendChild(periodItem);
+            });
+            
+            periodSection.style.display = 'block';
+        }
+
         function generateCalendar(startDate, endDate, classDates) {
             const calendarSection = document.getElementById('calendarSection');
             calendarSection.innerHTML = '';
@@ -950,7 +1004,6 @@
                 const calendarGrid = document.createElement('div');
                 calendarGrid.className = 'calendar-grid';
 
-                // 요일 헤더
                 const weekdays = ['일', '월', '화', '수', '목', '금', '토'];
                 weekdays.forEach((day, index) => {
                     const header = document.createElement('div');
@@ -961,17 +1014,14 @@
                     calendarGrid.appendChild(header);
                 });
 
-                // 첫째 날의 요일
                 const firstDay = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1).getDay();
                 
-                // 빈 칸
                 for (let i = 0; i < firstDay; i++) {
                     const emptyDiv = document.createElement('div');
                     emptyDiv.className = 'calendar-day empty';
                     calendarGrid.appendChild(emptyDiv);
                 }
 
-                // 날짜들
                 const daysInMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0).getDate();
                 
                 for (let day = 1; day <= daysInMonth; day++) {
@@ -1017,7 +1067,6 @@
             }
         }
 
-        // 2) 과정 저장 함수 수정: 추가 휴강 목록 저장
         function saveCourse() {
             const courseName = document.getElementById('courseName').value;
             const startDate = document.getElementById('startDate').value;
@@ -1038,7 +1087,7 @@
                 dailyHours: dailyHours,
                 totalHours: totalHours,
                 classDays: resultClassDays.replace('일', ''),
-                customHolidays: [...customHolidays] // 현재 customHolidays 상태를 복사하여 저장
+                customHolidays: [...customHolidays]
             };
 
             savedCourses.push(course);
@@ -1055,20 +1104,18 @@
             document.getElementById('newCustomHolidayDate').value = '';
             document.getElementById('newCustomHolidayName').value = '';
             
-            // 추가 휴강 목록 초기화
             customHolidays = [];
             saveCustomHolidays();
 
             document.getElementById('resultSection').style.display = 'none';
+            document.getElementById('periodSection').style.display = 'none';
             document.getElementById('legend').style.display = 'none';
             document.getElementById('calendarSection').innerHTML = '';
         }
 
-        // 초기화 및 로딩 시 함수 실행
         window.onload = function() {
             displaySavedCourses();
             displayCustomHolidays();
-            // 오늘 날짜를 기본값으로 설정
             const today = new Date();
             document.getElementById('startDate').value = formatDate(today);
         };
