@@ -154,9 +154,12 @@
         </div>
 
         <p style="text-align: right; margin-top: 10px; color: #64748b; font-size: 0.85rem;">
-            * <strong>산대특 훈련비:</strong> 입력된 기준단가의 130%를 적용하여 계산되었습니다.<br>
-            * <strong>국기 훈련비:</strong> 입력된 기준단가의 100%를 적용하여 계산되었습니다.<br>
-            * <strong>2026년 자비부담금:</strong> 총 훈련비의 10% (최대 60만원 한도) 적용.<br>
+            * <strong>2026년 자비부담금 (구간별 정액제):</strong><br>
+            - 300만원 이하: 10% (원단위 절삭)<br>
+            - 300만원 초과 ~ 600만원 이하: 30만원<br>
+            - 600만원 초과 ~ 1,200만원 이하: 40만원<br>
+            - 1,200만원 초과 ~ 1,800만원 이하: 50만원<br>
+            - 1,800만원 초과: 60만원<br>
             * <strong>특별훈련수당:</strong> 2026년은 350시간 이상 훈련 시에만 지급됩니다.
         </p>
     </div>
@@ -224,11 +227,30 @@
         const monthTotal25 = baseStipend25 + specialStipend25;
         const totalBenefit25 = (monthTotal25 * estimatedMonths) - selfPay25;
 
-        // --- 2026년 로직 ---
-        // 자비부담금: 10%, 최대 60만원
-        let selfPay26 = Math.floor(totalTrainCost * 0.1);
-        if (selfPay26 > 600000) selfPay26 = 600000;
-        selfPay26 = Math.floor(selfPay26 / 10) * 10;
+        // --- 2026년 로직 (수정: 구간별 정액 자비부담금) ---
+        let selfPay26 = 0;
+        let selfPayInfo = "";
+
+        if (totalTrainCost <= 3000000) {
+            // 300만원 이하: 10%, 원단위 절삭 (floor)
+            selfPay26 = Math.floor(totalTrainCost * 0.1); 
+            selfPayInfo = "10% (원단위 절삭)";
+        } else if (totalTrainCost <= 6000000) {
+            selfPay26 = 300000;
+            selfPayInfo = "정액 30만원";
+        } else if (totalTrainCost <= 12000000) {
+            selfPay26 = 400000;
+            selfPayInfo = "정액 40만원";
+        } else if (totalTrainCost <= 18000000) {
+            selfPay26 = 500000;
+            selfPayInfo = "정액 50만원";
+        } else {
+            // 1800만원 초과
+            selfPay26 = 600000;
+            selfPayInfo = "정액 60만원";
+        }
+
+        // 자부담 비율 계산 (표시용)
         const selfPayRatio = totalTrainCost > 0 ? ((selfPay26 / totalTrainCost) * 100).toFixed(1) : 0;
 
         const baseStipend26 = 200000;
@@ -285,7 +307,7 @@
                         <td><span class="txt-primary">0원</span><br><span class="badge">0%</span></td>
                         <td colspan="3" style="border-left:2px solid #22c55e;">
                             <span class="txt-red">${format(selfPay26)}</span><br>
-                            <span class="badge" style="background:#fee2e2; color:#991b1b;">${selfPayRatio}% (Max 60만)</span>
+                            <span class="badge" style="background:#fee2e2; color:#991b1b;">${selfPayInfo} (${selfPayRatio}%)</span>
                         </td>
                     </tr>
                     <tr>
