@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2025-2026 KDT 및 국기/산대특 정밀 분석기</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --secondary: #475569;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --border: #e2e8f0;
+            --red: #dc2626;
+            --green: #16a34a;
+            --orange: #ea580c;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Pretendard', -apple-system, sans-serif; }
+        
+        body { background-color: var(--bg); color: #1e293b; line-height: 1.5; padding: 20px; }
+        
+        .container { max-width: 1200px; margin: 0 auto; }
+        
+        header { text-align: center; margin-bottom: 30px; }
+        header h1 { font-size: 1.8rem; color: #0f172a; margin-bottom: 8px; font-weight: 800; }
+        header p { color: var(--secondary); font-size: 0.95rem; }
+
+        /* 입력 폼 스타일 */
+        .control-panel { 
+            background: var(--card); padding: 25px; border-radius: 16px; 
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); margin-bottom: 25px; 
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); 
+            gap: 20px; align-items: start; border: 1px solid var(--border);
+        }
+        
+        .form-group label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 0.9rem; color: var(--secondary); }
+        .form-group select, .form-group input { 
+            width: 100%; padding: 12px 15px; border: 1px solid var(--border); 
+            border-radius: 8px; font-size: 0.95rem; transition: 0.2s; background: #fff;
+        }
+        .form-group input:read-only { background-color: #f1f5f9; color: #64748b; cursor: not-allowed; }
+        .form-group select:focus, .form-group input:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+        
+        .btn-calc { 
+            grid-column: 1 / -1; background: var(--primary); color: white; border: none; 
+            padding: 14px; border-radius: 8px; font-size: 1.05rem; font-weight: 700; 
+            cursor: pointer; transition: 0.2s; margin-top: 10px;
+        }
+        .btn-calc:hover { background: #1d4ed8; transform: translateY(-1px); }
+
+        /* 결과 영역 스타일 */
+        #resultArea { display: none; animation: slideUp 0.4s ease-out; }
+
+        .result-section { margin-bottom: 40px; }
+        .result-title { 
+            font-size: 1.2rem; font-weight: 700; color: #334155; margin-bottom: 12px; 
+            border-left: 5px solid var(--primary); padding-left: 10px; 
+            display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;
+        }
+        .result-tag { font-size: 0.8rem; font-weight: 400; color: #64748b; background: #f1f5f9; padding: 4px 8px; border-radius: 4px; border: 1px solid #e2e8f0; }
+
+        .info-box { 
+            background: #fff7ed; border-left: 5px solid var(--orange); padding: 16px; 
+            border-radius: 8px; margin-bottom: 20px; font-size: 0.95rem; color: #9a3412; 
+            line-height: 1.6;
+        }
+
+        .table-wrap { overflow-x: auto; background: var(--card); border-radius: 16px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05); border: 1px solid var(--border); }
+        table { width: 100%; border-collapse: collapse; white-space: nowrap; }
+        
+        th, td { padding: 14px 16px; text-align: center; border-bottom: 1px solid var(--border); font-size: 0.95rem; }
+        th { background: #f8fafc; font-weight: 700; color: #334155; border-right: 1px solid var(--border); }
+        td { border-right: 1px solid var(--border); vertical-align: middle; }
+        th:last-child, td:last-child { border-right: none; }
+        
+        /* 컬럼 강조 */
+        .col-25 { background-color: #f1f5f9; color: #475569; }
+        .col-26-main { background-color: #ecfdf5; color: #047857; }
+        
+        /* 텍스트 스타일 */
+        .txt-primary { color: var(--primary); font-weight: 700; }
+        .txt-red { color: var(--red); font-weight: 700; }
+        .txt-green { color: var(--green); font-weight: 700; }
+        .sub-text { font-size: 0.8em; color: #64748b; margin-top: 4px; display: block; }
+        
+        .final-row { background-color: #f8fafc; border-top: 2px solid #cbd5e1; font-weight: 700; }
+        .badge { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; background: #e2e8f0; margin-left: 4px; vertical-align: middle; }
+
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>2025-2026 KDT 세부유형 및 비교 분석기</h1>
+        <p>선택하신 K-디지털 유형과 동일 기준단가 적용 시 산대특·국기 혜택 비교</p>
+    </header>
+
+    <div class="control-panel">
+        <div class="form-group">
+            <label>① 분석할 KDT 세부 유형 선택</label>
+            <select id="courseType" onchange="calculateAppliedPrice()">
+                <option value="kdt_singisul">K-디지털 (신기술) - 단가 130%</option>
+                <option value="kdt_seondo">K-디지털 (선도기업) - 18,150원</option>
+                <option value="kdt_cheomdan">K-디지털 (첨단산업) - 18,150원</option>
+                <option value="kdt_dangi">K-디지털 (단기심화) - 단가 200%</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>② 기준 훈련 단가 (원)</label>
+            <input type="number" id="inputPrice" placeholder="승인 단가 입력" value="7290" oninput="calculateAppliedPrice()">
+            <span class="sub-text" id="appliedPriceText">적용 단가: 9,477원 (130%)</span>
+        </div>
+
+        <div class="form-group">
+            <label>③ 총 훈련시간 (시간)</label>
+            <input type="number" id="hours" placeholder="총 시간 입력" value="640">
+        </div>
+
+        <button class="btn-calc" onclick="analyzeAll()">통합 분석 실행</button>
+    </div>
+
+    <div id="resultArea">
+        <div class="info-box" id="analysisMsg"></div>
+
+        <!-- 1. 선택한 KDT 유형 결과 -->
+        <div class="result-section">
+            <div class="result-title">
+                1. [선택] K-디지털 트레이닝 분석 결과
+                <span class="result-tag" id="selectedTitle">K-디지털 (신기술)</span>
+            </div>
+            <div class="table-wrap" id="mainTable"></div>
+        </div>
+
+        <!-- 2. 산대특 비교 (단가 130% 적용) -->
+        <div class="result-section">
+            <div class="result-title">
+                2. [비교] 산업구조변화대응(산대특)
+                <span class="result-tag">기준단가 130% 적용</span>
+            </div>
+            <div class="table-wrap" id="sdtTable"></div>
+        </div>
+
+        <!-- 3. 국기 비교 (단가 100% 적용) -->
+        <div class="result-section">
+            <div class="result-title">
+                3. [비교] 국가기간전략산업(국기)
+                <span class="result-tag">기준단가 100% 적용</span>
+            </div>
+            <div class="table-wrap" id="gukTable"></div>
+        </div>
+
+        <p style="text-align: right; margin-top: 10px; color: #64748b; font-size: 0.85rem;">
+            * <strong>산대특 훈련비:</strong> 입력된 기준단가의 130%를 적용하여 계산되었습니다.<br>
+            * <strong>국기 훈련비:</strong> 입력된 기준단가의 100%를 적용하여 계산되었습니다.<br>
+            * <strong>2026년 자비부담금:</strong> 총 훈련비의 10% (최대 60만원 한도) 적용.<br>
+            * <strong>특별훈련수당:</strong> 2026년은 350시간 이상 훈련 시에만 지급됩니다.
+        </p>
+    </div>
+</div>
+
+<script>
+    let finalAppliedPrice = 0;
+
+    function format(num) {
+        return num.toLocaleString('ko-KR') + '원';
+    }
+
+    // 선택 유형 단가 계산 및 표시
+    function calculateAppliedPrice() {
+        const courseType = document.getElementById('courseType').value;
+        const inputPrice = Number(document.getElementById('inputPrice').value) || 0;
+        let calculated = inputPrice;
+        let infoText = "";
+
+        switch (courseType) {
+            case 'kdt_seondo':
+            case 'kdt_cheomdan':
+                calculated = 18150;
+                infoText = "고정 단가";
+                break;
+            case 'kdt_singisul':
+                calculated = Math.floor(inputPrice * 1.3);
+                infoText = "입력값의 130%";
+                break;
+            case 'kdt_dangi':
+                calculated = Math.floor(inputPrice * 2.0);
+                infoText = "입력값의 200%";
+                break;
+            default:
+                calculated = inputPrice;
+                infoText = "입력값 적용";
+                break;
+        }
+        
+        finalAppliedPrice = calculated;
+        document.getElementById('appliedPriceText').innerText = `KDT 적용 단가: ${format(finalAppliedPrice)} (${infoText})`;
+    }
+
+    // 초기 실행
+    calculateAppliedPrice();
+
+    // 테이블 생성 함수
+    // bizType: 'kdt'(KDT유형), 'sdt'(산대특), 'guk'(국기)
+    function generateTableHTML(bizType, appliedPrice, hours) {
+        const estimatedMonths = hours / 160;
+        const totalTrainCost = appliedPrice * hours;
+
+        // --- 2025년 로직 ---
+        const selfPay25 = 0; // 25년 자부담 0원
+        const baseStipend25 = 116000;
+        let specialStipend25 = 0;
+        
+        // 2025년 기준: 국기(guk)는 특별훈련수당 없음(0원), KDT와 산대특은 20만원
+        if (bizType === 'guk') {
+            specialStipend25 = 0;
+        } else {
+            specialStipend25 = 200000;
+        }
+
+        const monthTotal25 = baseStipend25 + specialStipend25;
+        const totalBenefit25 = (monthTotal25 * estimatedMonths) - selfPay25;
+
+        // --- 2026년 로직 ---
+        // 자비부담금: 10%, 최대 60만원
+        let selfPay26 = Math.floor(totalTrainCost * 0.1);
+        if (selfPay26 > 600000) selfPay26 = 600000;
+        selfPay26 = Math.floor(selfPay26 / 10) * 10;
+        const selfPayRatio = totalTrainCost > 0 ? ((selfPay26 / totalTrainCost) * 100).toFixed(1) : 0;
+
+        const baseStipend26 = 200000;
+        let spSeoul = 0, spNon = 0, spDec = 0;
+
+        // 350시간 이상 시 특별수당 지급
+        if (hours >= 350) {
+            spSeoul = 100000;
+            spNon = 200000;
+            spDec = 300000;
+        }
+
+        const monthTotalSeoul = baseStipend26 + spSeoul;
+        const monthTotalNon = baseStipend26 + spNon;
+        const monthTotalDec = baseStipend26 + spDec;
+
+        const netSeoul = (monthTotalSeoul * estimatedMonths) - selfPay26;
+        const netNon = (monthTotalNon * estimatedMonths) - selfPay26;
+        const netDec = (monthTotalDec * estimatedMonths) - selfPay26;
+
+        const diffSeoul = netSeoul - totalBenefit25;
+        const diffNon = netNon - totalBenefit25;
+        const diffDec = netDec - totalBenefit25;
+
+        // 25년 특별수당 텍스트 (지원 여부 표시)
+        let specialStipend25Text = format(specialStipend25);
+        if (bizType === 'guk') {
+            specialStipend25Text += '<br><span class="sub-text">(25년 미지원)</span>';
+        } else {
+            specialStipend25Text += '<br><span class="sub-text">(25년 지원)</span>';
+        }
+
+        return `
+            <table>
+                <thead>
+                    <tr>
+                        <th rowspan="2" style="width:140px;">구분</th>
+                        <th rowspan="2" class="col-25">2025년 현행<br><span style="font-weight:400; font-size:0.85em;">(자부담 0원)</span></th>
+                        <th colspan="3" class="col-26-main">2026년 개정 (지역별 차등)</th>
+                    </tr>
+                    <tr>
+                        <th style="background:#f0fdf4;">서울/수도권</th>
+                        <th style="background:#f0fdf4;">비수도권</th>
+                        <th style="background:#f0fdf4;">인구감소지역</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td style="text-align:left;"><strong>총 훈련비</strong><br><span class="sub-text">단가: ${format(appliedPrice)}</span></td>
+                        <td colspan="4" style="background:#f1f5f9; font-weight:700; color:#334155;">${format(totalTrainCost)}</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align:left;"><strong>자비부담금</strong><br><span class="sub-text">실제 납부액</span></td>
+                        <td><span class="txt-primary">0원</span><br><span class="badge">0%</span></td>
+                        <td colspan="3" style="border-left:2px solid #22c55e;">
+                            <span class="txt-red">${format(selfPay26)}</span><br>
+                            <span class="badge" style="background:#fee2e2; color:#991b1b;">${selfPayRatio}% (Max 60만)</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="text-align:left;">[월] 훈련장려금<br><span class="sub-text">기본 수당</span></td>
+                        <td>${format(baseStipend25)}</td>
+                        <td colspan="3" style="color:#16a34a; font-weight:700;">${format(baseStipend26)} <span class="badge">인상</span></td>
+                    </tr>
+                    <tr>
+                        <td style="text-align:left;">[월] 특별훈련수당<br><span class="sub-text">${hours < 350 ? '350시간 미만 미지급' : '지역별 차등'}</span></td>
+                        <td>${specialStipend25Text}</td>
+                        <td>${format(spSeoul)}</td>
+                        <td>${format(spNon)}</td>
+                        <td>${format(spDec)}</td>
+                    </tr>
+                    <tr style="background:#fff7ed;">
+                        <td style="text-align:left;"><strong>월 수령액 합계</strong></td>
+                        <td><strong>${format(monthTotal25)}</strong></td>
+                        <td><strong>${format(monthTotalSeoul)}</strong></td>
+                        <td><strong>${format(monthTotalNon)}</strong></td>
+                        <td><strong>${format(monthTotalDec)}</strong></td>
+                    </tr>
+                    <tr class="final-row">
+                        <td style="text-align:left;">최종 혜택 비교<br><span class="sub-text">총수령액 - 자부담</span></td>
+                        <td style="color:#2563eb;">${format(Math.floor(totalBenefit25))}</td>
+                        <td>${format(Math.floor(netSeoul))}<br><span class="${diffSeoul >= 0 ? 'txt-green' : 'txt-red'}" style="font-size:0.8em;">(${diffSeoul > 0 ? '+' : ''}${format(Math.floor(diffSeoul))})</span></td>
+                        <td>${format(Math.floor(netNon))}<br><span class="${diffNon >= 0 ? 'txt-green' : 'txt-red'}" style="font-size:0.8em;">(${diffNon > 0 ? '+' : ''}${format(Math.floor(diffNon))})</span></td>
+                        <td>${format(Math.floor(netDec))}<br><span class="${diffDec >= 0 ? 'txt-green' : 'txt-red'}" style="font-size:0.8em;">(${diffDec > 0 ? '+' : ''}${format(Math.floor(diffDec))})</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        `;
+    }
+
+    function analyzeAll() {
+        // 입력값 가져오기 및 KDT 단가 재계산
+        calculateAppliedPrice();
+        
+        const hours = Number(document.getElementById('hours').value);
+        const inputPrice = Number(document.getElementById('inputPrice').value) || 0;
+        const selectedType = document.getElementById('courseType');
+        const selectedText = selectedType.options[selectedType.selectedIndex].text;
+
+        if (hours <= 0) {
+            alert("훈련 시간을 입력해주세요.");
+            return;
+        }
+
+        // 1. 선택한 KDT 과정 테이블 (finalAppliedPrice 사용)
+        document.getElementById('selectedTitle').innerText = selectedText;
+        document.getElementById('mainTable').innerHTML = generateTableHTML('kdt', finalAppliedPrice, hours);
+
+        // 2. 산대특 비교 테이블 (입력 단가 * 130%)
+        // 산대특은 25년에도 특별수당 20만원 지원, 26년에는 기준단가 130% 적용하여 자부담 산출
+        const sdtPrice = Math.floor(inputPrice * 1.3);
+        document.getElementById('sdtTable').innerHTML = generateTableHTML('sdt', sdtPrice, hours);
+
+        // 3. 국기 비교 테이블 (입력 단가 * 100%)
+        // 국기는 25년에 특별수당 0원, 26년에 기준단가 100% 적용하여 자부담 산출
+        document.getElementById('gukTable').innerHTML = generateTableHTML('guk', inputPrice, hours);
+
+        // 메시지 처리
+        const msgBox = document.getElementById('analysisMsg');
+        if (hours < 350) {
+            msgBox.innerHTML = `⚠️ <strong>훈련시간 부족(350시간 미만):</strong> 2026년 특별훈련수당 지급 기준(350시간 이상)에 미달하여, 2025년 대비 혜택이 감소할 수 있습니다.`;
+        } else {
+            msgBox.innerHTML = `💡 <strong>분석 완료:</strong> 
+            선택하신 <strong>${selectedText}</strong> 결과와 더불어, 동일한 기준단가 입력 시 
+            <strong>산대특(130% 단가)</strong> 및 <strong>국기(100% 단가)</strong> 훈련의 혜택 변화를 하단에서 비교 확인하실 수 있습니다.`;
+        }
+
+        document.getElementById('resultArea').style.display = 'block';
+    }
+</script>
+
+</body>
+</html>
